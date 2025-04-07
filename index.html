@@ -31,30 +31,11 @@
   </div>
 
   <script>
-    // API'lerden veri çekme fonksiyonları
-
-    // Döviz Kuru ve Petrol Fiyatı
-    async function getFinancialData() {
-      try {
-        const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD'); // Döviz API
-        const data = await response.json();
-        const usdTry = data.rates.TRY;
-
-        const brentResponse = await fetch('https://api.coindesk.com/v1/bpi/currentprice/BTC.json'); // Brent Petrol API örneği
-        const brentData = await brentResponse.json();
-        const brentPrice = brentData.bpi.USD.rate_float;
-
-        document.getElementById('currency').innerHTML = `<p>USD/TRY: ${usdTry}</p>`;
-        document.getElementById('brent').innerHTML = `<p>Brent Petrol Fiyatı: ${brentPrice} USD</p>`;
-      } catch (error) {
-        console.error('Hata:', error);
-      }
-    }
-
-    // Haber Başlıkları
+    // Haber Başlıklarını Çekme
     async function getNews() {
+      const apiKey = "010e018edf7549a38593bb08ce8d18e4";  // Buraya NewsAPI anahtarını koyduk
       try {
-        const response = await fetch('https://newsapi.org/v2/top-headlines?country=us&apiKey=YOUR_API_KEY'); // Haber API
+        const response = await fetch(`https://newsapi.org/v2/top-headlines?country=us&apiKey=${apiKey}`);
         const newsData = await response.json();
         const newsContainer = document.getElementById('news');
         newsData.articles.forEach(article => {
@@ -63,6 +44,27 @@
           newsItem.innerHTML = `<a href="${article.url}" target="_blank">${article.title}</a>`;
           newsContainer.appendChild(newsItem);
         });
+      } catch (error) {
+        console.error('Hata:', error);
+      }
+    }
+
+    // Döviz Kurları ve Petrol Fiyatları
+    async function getFinancialData() {
+      const apiKey = "3FHAOFOTGUIJ02UY";  // Buraya Alpha Vantage API anahtarını koyduk
+      try {
+        // Döviz Kuru (USD/TRY)
+        const response = await fetch(`https://www.alphavantage.co/query?function=FX_RATE&from_currency=USD&to_currency=TRY&apikey=${apiKey}`);
+        const data = await response.json();
+        const usdTry = data['Realtime Currency Exchange Rate']['5. Exchange Rate'];
+
+        // Brent Petrol Fiyatı
+        const brentResponse = await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=BRENT&interval=60min&apikey=${apiKey}`);
+        const brentData = await brentResponse.json();
+        const brentPrice = brentData['Time Series (60min)'][Object.keys(brentData['Time Series (60min)'])[0]]['1. open'];
+
+        document.getElementById('currency').innerHTML = `<p>USD/TRY: ${usdTry}</p>`;
+        document.getElementById('brent').innerHTML = `<p>Brent Petrol Fiyatı: ${brentPrice} USD</p>`;
       } catch (error) {
         console.error('Hata:', error);
       }
